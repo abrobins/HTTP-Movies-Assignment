@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { useParams, useHistory } from "react-router-dom";
 
 // const initialItem = {
 //     id: '',
@@ -10,18 +11,17 @@ import axios from "axios";
 // };
 
 const UpdateList = props => {
-  const [item, setItem] = useState({ id: props.match.params.id });
+  const { id } = useParams();
+  const [item, setItem] = useState({ id });
   console.log("props.match.params.id", props.match.params.id);
 
   useEffect(() => {
-    const itemToUpdate = props.movies.find(
-      thing => `${thing.id}` === props.match.params.id
-    );
+    const itemToUpdate = props.movies.find(thing => `${thing.id}` === id);
 
     if (itemToUpdate) {
       setItem(itemToUpdate);
     }
-  }, [props.movies, props.match.params.id]);
+  }, [props.movies, id]);
 
   //   const changeHandler = ev => {
   //     ev.persist();
@@ -31,7 +31,7 @@ const UpdateList = props => {
 
   const changeHandler = ev => {
     setItem({
-      item,
+      ...item,
       [ev.target.name]: ev.target.value
     });
   };
@@ -39,21 +39,25 @@ const UpdateList = props => {
   const handleSubmit = e => {
     e.preventDefault();
 
-    const formattedMovie = {
-      ...item,
-      stars: item.stars
-      // stars: item.stars.join(", ")
-    };
+    // const formattedMovie = {
+    //   ...item,
+    //   id: id,
+    //   stars: item.stars
+    //   // stars: item.stars.join(", ")
+    // };
 
     axios
-      .put(
-        `http://localhost:5000/api/movies/${props.match.params.id}`,
-        formattedMovie
-      )
+      .put(`http://localhost:5000/api/movies/${id}`, {
+        id: id,
+        title: item.title,
+        director: item.director,
+        metascore: Number(item.metascore),
+        stars: [item.stars]
+      })
       .then(res => {
         console.log(res);
         //document.querySelector("form").reset();
-        setItem(formattedMovie);
+        //setItem(formattedMovie);
         props.history.push("/");
       })
       .catch(err => {
